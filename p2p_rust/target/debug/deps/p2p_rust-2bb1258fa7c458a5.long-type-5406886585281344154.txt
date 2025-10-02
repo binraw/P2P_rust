@@ -1,0 +1,1 @@
+Result<libp2p_noise::Config, libp2p_noise::Error>: InboundConnectionUpgrade<multistream_select::negotiated::Negotiated<_>>

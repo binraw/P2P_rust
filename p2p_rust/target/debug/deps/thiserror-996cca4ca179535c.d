@@ -1,0 +1,12 @@
+/Users/robintruvelot/Desktop/rust_projet/p2p_rust/target/debug/deps/thiserror-996cca4ca179535c.d: /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /Users/robintruvelot/Desktop/rust_projet/p2p_rust/target/debug/build/thiserror-5633945426911935/out/private.rs
+
+/Users/robintruvelot/Desktop/rust_projet/p2p_rust/target/debug/deps/libthiserror-996cca4ca179535c.rmeta: /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /Users/robintruvelot/Desktop/rust_projet/p2p_rust/target/debug/build/thiserror-5633945426911935/out/private.rs
+
+/Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs:
+/Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs:
+/Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs:
+/Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs:
+/Users/robintruvelot/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs:
+/Users/robintruvelot/Desktop/rust_projet/p2p_rust/target/debug/build/thiserror-5633945426911935/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/robintruvelot/Desktop/rust_projet/p2p_rust/target/debug/build/thiserror-5633945426911935/out
