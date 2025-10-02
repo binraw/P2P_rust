@@ -1,1 +1,0 @@
-Result<libp2p_noise::Config, libp2p_noise::Error>: InboundConnectionUpgrade<multistream_select::negotiated::Negotiated<libp2p::libp2p_tcp::tokio::TcpStream>>

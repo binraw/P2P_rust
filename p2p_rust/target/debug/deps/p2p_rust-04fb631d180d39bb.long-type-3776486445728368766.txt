@@ -1,1 +1,0 @@
-Authenticated<libp2p::libp2p_core::transport::and_then::AndThen<libp2p::libp2p_tcp::Transport<libp2p::libp2p_tcp::tokio::Tcp>, impl (FnOnce(libp2p::libp2p_tcp::tokio::TcpStream, libp2p::libp2p_core::ConnectedPoint) -> Authenticate<libp2p::libp2p_tcp::tokio::TcpStream, Result<libp2p::libp2p_noise::Config, libp2p::libp2p_noise::Error>>) + Clone>>

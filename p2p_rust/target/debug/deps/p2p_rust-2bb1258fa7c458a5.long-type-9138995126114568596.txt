@@ -1,1 +1,0 @@
-Authenticated<libp2p::libp2p_core::transport::and_then::AndThen<libp2p_tcp::Transport<_>, impl (FnOnce(_, ConnectedPoint) -> Authenticate<_, Result<libp2p_noise::Config, libp2p_noise::Error>>) + Clone>>
