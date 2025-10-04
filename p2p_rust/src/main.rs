@@ -10,8 +10,10 @@ use libp2p::{
     swarm::{Swarm, SwarmEvent, Config},
     Multiaddr, PeerId, Transport,
 };
-// mod utils;
-// use utils::chat::;
+// mod utils;   
+// use utils::chat::*;
+// use utils::chat::chat;
+// use utils::chat::chat_dialer;
 
 
 
@@ -87,6 +89,9 @@ async fn async_main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("Ping de {peer:?}: {result:?}");
                 let _connection = connection.clone();
             }
+            // SwarmEvent::Behaviour(chat::Event { peer, message }) => {
+            //     println!("Message de {peer:?}: {message}");
+            // }
             _ => {}
         }
     }

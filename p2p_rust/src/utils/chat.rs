@@ -48,3 +48,32 @@ println!("Listening on {:?}", addr);
 
 Ok(())
 }
+
+// voir car normalement je dois tester en mode memoire mais la le dialer est en tcp donc a changer
+
+pub fn chat_dialer() -> Result<(), Box<dyn std::error::Error>> {
+    let local_key = Keypair::generate_ed25519();
+    let local_peer_id = tet_libp2p_core::PeerId::from(local_key.public());
+
+    let noise_keys = tet_libp2p_noise::Keypair::<tet_libp2p_noise::X25519Spec>::new().into_authentic(&local_key).unwrap();
+    let transport = MemoryTransport::default()
+           .upgrade(tet_libp2p_core::upgrade::Version::V1)
+           .authenticate(tet_libp2p_noise::NoiseConfig::xx(noise_keys).into_authenticated())
+           .multiplex(tet_libp2p_mplex::MplexConfig::new())
+           .boxed();
+
+    let mut swarm = {
+        let gossipsub_config = gossipsub::GossipsubConfig::default();
+        let mut gossipsub: gossipsub::Gossipsub =
+            gossipsub::Gossipsub::new(message_authenticity, gossipsub_config).unwrap();
+        gossipsub.subscribe(&topic);
+        tet_libp2p_swarm::Swarm::new(transport, gossipsub, local_peer_id)
+    };
+
+    let target: Multiaddr = "/ip4/127.0.0.1/tcp/10000".parse()?;
+    swarm.dial(target.clone())?;
+    println!("Mode: dialer → {target}");
+
+    Ok(())
+}
+
