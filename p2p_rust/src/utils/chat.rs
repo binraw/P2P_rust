@@ -2,6 +2,73 @@ use gossipsub::GossipsubEvent;
 use tet_libp2p_core::{identity::Keypair,transport::{Transport, MemoryTransport}, Multiaddr};
 use gossipsub::MessageAuthenticity;
 
+
+struct ChatCodec;
+
+#[derive(Debug, Clone)]
+struct ChatProtocol;
+
+#[derive(Clone)]
+struct ChatRequest(Vec<u8>);
+#[derive(Clone)]
+struct ChatResponse(Vec<u8>);
+
+impl RequestResponseCodec for ChatCodec {
+    type Protocol = ChatProtocol;
+    type Request = ChatRequest;
+    type Response = ChatResponse;
+
+    fn read_request<T: AsyncRead + Unpin + Send>(
+        &mut self,
+        _: &ChatProtocol,
+        io: &mut T,
+    ) -> std::io::Result<Self::Request> {
+        let mut buf = Vec::new();
+        futures::executor::block_on(async {
+            io.read_to_end(&mut buf).await?;
+            Ok(ChatRequest(buf))
+        })
+    }
+
+    fn read_response<T: AsyncRead + Unpin + Send>(
+        &mut self,
+        _: &ChatProtocol,
+        io: &mut T,
+    ) -> std::io::Result<Self::Response> {
+        let mut buf = Vec::new();
+        futures::executor::block_on(async {
+            io.read_to_end(&mut buf).await?;
+            Ok(ChatResponse(buf))
+        })
+    }
+
+    fn write_request<T: AsyncWrite + Unpin + Send>(
+        &mut self,
+        _: &ChatProtocol,
+        io: &mut T,
+        ChatRequest(data): ChatRequest,
+    ) -> std::io::Result<()> {
+        futures::executor::block_on(async {
+            io.write_all(&data).await?;
+            io.close().await?;
+            Ok(())
+        })
+    }
+
+    fn write_response<T: AsyncWrite + Unpin + Send>(
+        &mut self,
+        _: &ChatProtocol,
+        io: &mut T,
+        ChatResponse(data): ChatResponse,
+    ) -> std::io::Result<()> {
+        futures::executor::block_on(async {
+            io.write_all(&data).await?;
+            io.close().await?;
+            Ok(())
+        })
+    }
+}
+
 // Utilise la memoire pour le transport donc a changer pour le tcp
 
 pub fn chat() -> Result<(), Box<dyn std::error::Error>> {
@@ -42,7 +109,8 @@ let mut swarm = {
 };
 
 // Listen on a memory transport.
-let memory: Multiaddr = tet_libp2p_core::multiaddr::Protocol::Memory(10).into();
+// let memory: Multiaddr = tet_libp2p_core::multiaddr::Protocol::Memory(10).into();
+let memory: Multiaddr = "/ip4/127.0.0.1/tcp/0".parse()?;
 let addr = tet_libp2p_swarm::Swarm::listen_on(&mut swarm, memory).unwrap();
 println!("Listening on {:?}", addr);
 
