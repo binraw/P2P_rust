@@ -10,10 +10,9 @@ use libp2p::{
     swarm::{Swarm, SwarmEvent, Config},
     Multiaddr, PeerId, Transport,
 };
-// mod utils;   
-// use utils::chat::*;
-// use utils::chat::chat;
-// use utils::chat::chat_dialer;
+
+pub mod utils;
+
 
 
 
@@ -24,15 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     rt.block_on(async_main())
 }
 
-// fn send_message(swarm: &mut Swarm<Behaviour, transport, local_peer_id>, message: &str) -> Result<(), Box<dyn std::error::Error>> {
-//     let message = swarm.behaviour_mut().send_message(message);
-//     Ok(())
-// }
 
-// fn receive_message(swarm: &mut Swarm<Behaviour, transport, local_peer_id>) -> Result<String, Box<dyn std::error::Error>> {
-//     let message = swarm.behaviour_mut().receive_message().unwrap();
-//     Ok(message)
-// }
 
 async fn async_main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
@@ -58,9 +49,6 @@ async fn async_main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 🔑 Ajouter un Behaviour (ici Ping)
     let behaviour = ping::Behaviour::default(); 
-
-    // let chat = chat::Behaviour::default();
-
 
     let mut swarm = Swarm::new(transport, behaviour, local_peer_id, Config::with_tokio_executor());
 
@@ -89,9 +77,6 @@ async fn async_main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("Ping de {peer:?}: {result:?}");
                 let _connection = connection.clone();
             }
-            // SwarmEvent::Behaviour(chat::Event { peer, message }) => {
-            //     println!("Message de {peer:?}: {message}");
-            // }
             _ => {}
         }
     }
