@@ -1,4 +1,5 @@
 use futures::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt};
+use serde::{Serialize, Deserialize};
 
 // Note: RequestResponseCodec n'est pas disponible sans la feature "request-response"
 // Les fonctions chat() et chat_dialer() sont commentées car elles utilisent des dépendances manquantes
@@ -98,4 +99,37 @@ impl RequestResponseCodec for ChatCodec {
             Ok(())
         })
     }
+}
+#[derive(Serialize, Deserialize)]
+enum Message {
+    Ping(PingMessage),
+    Pong(PongMessage),
+    Chat(ChatMessage),
+    Request(RequestMessage),
+    Response(ResponseMessage),
+}
+
+#[derive(Serialize, Deserialize)]
+struct PingMessage {
+    id: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct PongMessage {
+    id: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ChatMessage {
+    id: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct RequestMessage {
+    id: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ResponseMessage {
+    id: u64,
 }
