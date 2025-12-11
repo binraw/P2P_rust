@@ -3,101 +3,86 @@ use serde::{Serialize, Deserialize};
 
 // Note: RequestResponseCodec n'est pas disponible sans la feature "request-response"
 // Les fonctions chat() et chat_dialer() sont commentées car elles utilisent des dépendances manquantes
-pub trait RequestResponseCodec {
-    type Protocol;
-    type Request;
-    type Response;
-    
-    fn read_request<T: AsyncRead + Unpin + Send>(
-        &mut self,
-        protocol: &Self::Protocol,
-        io: &mut T,
-    ) -> std::io::Result<Self::Request>;
-    
-    fn read_response<T: AsyncRead + Unpin + Send>(
-        &mut self,
-        protocol: &Self::Protocol,
-        io: &mut T,
-    ) -> std::io::Result<Self::Response>;
-    
-    fn write_request<T: AsyncWrite + Unpin + Send>(
-        &mut self,
-        protocol: &Self::Protocol,
-        io: &mut T,
-        req: Self::Request,
-    ) -> std::io::Result<()>;
-    
-    fn write_response<T: AsyncWrite + Unpin + Send>(
-        &mut self,
-        protocol: &Self::Protocol,
-        io: &mut T,
-        res: Self::Response,
-    ) -> std::io::Result<()>;
-}
+use tokio::io::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt};
+use std::io::ErrorKind;
+use futures::future::BoxFuture; // Pour les futures retournées par le Codec libp2p
+use std::{io::ErrorKind, iter};
+
+// --- LE TRAIT VRAI DE LIBP2P UTILISE DES FUTURES ---
+
+// (Pour l'exemple, nous allons simuler les opérations asynchrones)
 
 pub struct ChatCodec;
 
-#[derive(Debug, Clone)]
-pub struct ChatProtocol;
-
-#[derive(Clone)]
-pub struct ChatRequest(pub Vec<u8>);
-#[derive(Clone)]
-pub struct ChatResponse(pub Vec<u8>);
-
-impl RequestResponseCodec for ChatCodec {
+impl libp2p::request_response::RequestResponseCodec for ChatCodec {
+    // ... Types Protocol, Request, Response (comme définis avant)
     type Protocol = ChatProtocol;
     type Request = ChatRequest;
     type Response = ChatResponse;
-
-    fn read_request<T: AsyncRead + Unpin + Send>(
-        &mut self,
-        _: &ChatProtocol,
-        io: &mut T,
-    ) -> std::io::Result<Self::Request> {
-        let mut buf = Vec::new();
-        futures::executor::block_on(async {
-            io.read_to_end(&mut buf).await?;
+    
+    // La fonction doit retourner un Future qui sera poll
+    fn read_request(&mut self, protocol: &Self::Protocol, io: &mut (impl AsyncRead + Unpin + Send + '_)) -> BoxFuture<'_, std::io::Result<Self::Request>> {
+        Box::pin(async move {
+            // 1. Lire le préfixe de longueur (4 octets pour u32)
+            let len = io.read_u32().await?;
+            if len == 0 {
+                return Err(std::io::Error::new(ErrorKind::InvalidData, "Empty message"));
+            }
+            let len = len as usize;
+            
+            // 2. Lire le message de la taille spécifiée
+            let mut buf = vec![0u8; len];
+            io.read_exact(&mut buf).await?;
+            
             Ok(ChatRequest(buf))
         })
     }
 
-    fn read_response<T: AsyncRead + Unpin + Send>(
-        &mut self,
-        _: &ChatProtocol,
-        io: &mut T,
-    ) -> std::io::Result<Self::Response> {
-        let mut buf = Vec::new();
-        futures::executor::block_on(async {
-            io.read_to_end(&mut buf).await?;
-            Ok(ChatResponse(buf))
-        })
-    }
+    fn write_request(&mut self, protocol: &Self::Protocol, io: &mut (impl AsyncWrite + Unpin + Send + '_), ChatRequest(data): ChatRequest) -> BoxFuture<'_, std::io::Result<()>> {
+        Box::pin(async move {
+            let len = data.len() as u32;
 
-    fn write_request<T: AsyncWrite + Unpin + Send>(
-        &mut self,
-        _: &ChatProtocol,
-        io: &mut T,
-        ChatRequest(data): ChatRequest,
-    ) -> std::io::Result<()> {
-        futures::executor::block_on(async {
+            // 1. Écrire le préfixe de longueur
+            io.write_u32(len).await?;
+
+            // 2. Écrire les données
             io.write_all(&data).await?;
-            io.close().await?;
+
+            // 3. Flusher pour garantir l'envoi (NE PAS fermer le flux)
+            io.flush().await?; 
+            
             Ok(())
         })
     }
-
-    fn write_response<T: AsyncWrite + Unpin + Send>(
-        &mut self,
-        _: &ChatProtocol,
-        io: &mut T,
-        ChatResponse(data): ChatResponse,
-    ) -> std::io::Result<()> {
-        futures::executor::block_on(async {
-            io.write_all(&data).await?;
-            io.close().await?;
-            Ok(())
+    
+    // read_response et write_response seraient implémentées de la même manière
+    fn read_response(&mut self, protocol: &Self::Protocol, io: &mut (impl AsyncRead + Unpin + Send + '_)) -> BoxFuture<'_, std::io::Result<Self::Response>> {
+        // Implémentation identique à read_request, mais retourne ChatResponse
+        // ...
+        Box::pin(async move {
+             let len = io.read_u32().await?;
+             let mut buf = vec![0u8; len as usize];
+             io.read_exact(&mut buf).await?;
+             Ok(ChatResponse(buf))
         })
+    }
+
+    fn write_response(&mut self, protocol: &Self::Protocol, io: &mut (impl AsyncWrite + Unpin + Send + '_), ChatResponse(data): ChatResponse) -> BoxFuture<'_, std::io::Result<()>> {
+        // Implémentation identique à write_request, mais prend ChatResponse
+        // ...
+        Box::pin(async move {
+             let len = data.len() as u32;
+             io.write_u32(len).await?;
+             io.write_all(&data).await?;
+             io.flush().await?;
+             Ok(())
+        })
+    }
+
+    impl PortocolName for ChatProtocol {
+        fn protocol_name(&self) -> &'static str {
+            "/p2p/chat/request/1.0.0"
+        }
     }
 }
 #[derive(Serialize, Deserialize)]
