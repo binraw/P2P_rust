@@ -1,24 +1,27 @@
 use futures::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt};
 use serde::{Serialize, Deserialize};
-
-// Note: RequestResponseCodec n'est pas disponible sans la feature "request-response"
-// Les fonctions chat() et chat_dialer() sont commentées car elles utilisent des dépendances manquantes
-use tokio::io::{AsyncRead, AsyncWrite, AsyncReadExt, AsyncWriteExt};
-use std::io::ErrorKind;
 use futures::future::BoxFuture; // Pour les futures retournées par le Codec libp2p
 use std::{io::ErrorKind, iter};
 
-// --- LE TRAIT VRAI DE LIBP2P UTILISE DES FUTURES ---
-
-// (Pour l'exemple, nous allons simuler les opérations asynchrones)
 
 pub struct ChatCodec;
+
+
+
+impl PortocolName for ChatProtocol {
+    fn protocol_name(&self) -> &'static str {
+        "/p2p/chat/request/1.0.0"
+    }
+}
+
 
 impl libp2p::request_response::RequestResponseCodec for ChatCodec {
     // ... Types Protocol, Request, Response (comme définis avant)
     type Protocol = ChatProtocol;
     type Request = ChatRequest;
     type Response = ChatResponse;
+    
+  
     
     // La fonction doit retourner un Future qui sera poll
     fn read_request(&mut self, protocol: &Self::Protocol, io: &mut (impl AsyncRead + Unpin + Send + '_)) -> BoxFuture<'_, std::io::Result<Self::Request>> {
@@ -78,15 +81,10 @@ impl libp2p::request_response::RequestResponseCodec for ChatCodec {
              Ok(())
         })
     }
-
-    impl PortocolName for ChatProtocol {
-        fn protocol_name(&self) -> &'static str {
-            "/p2p/chat/request/1.0.0"
-        }
-    }
 }
+
 #[derive(Serialize, Deserialize)]
-enum Message {
+pub enum Message {
     Ping(PingMessage),
     Pong(PongMessage),
     Chat(ChatMessage),
@@ -95,26 +93,26 @@ enum Message {
 }
 
 #[derive(Serialize, Deserialize)]
-struct PingMessage {
+pub struct PingMessage {
     id: u64,
 }
 
 #[derive(Serialize, Deserialize)]
-struct PongMessage {
+pub struct PongMessage {
     id: u64,
 }
 
 #[derive(Serialize, Deserialize)]
-struct ChatMessage {
+pub struct ChatMessage {
     id: u64,
 }
 
 #[derive(Serialize, Deserialize)]
-struct RequestMessage {
+pub struct RequestMessage {
     id: u64,
 }
 
 #[derive(Serialize, Deserialize)]
-struct ResponseMessage {
+pub struct ResponseMessage {
     id: u64,
 }

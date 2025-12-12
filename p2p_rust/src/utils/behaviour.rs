@@ -1,22 +1,46 @@
-use libp2p::kad::Kademlia;
-use libp2p::request_response::RequestResponse;
-use libp2p::{kad::KademliaEvent, request_response::RequestResponseEvent};
+use libp2p::swarm::NetworkBehaviour;
+
+use libp2p::{
+    kad::{
+        Behaviour as Kademlia,           // Le type Kademlia est nommé Behaviour
+        Event as KademliaEvent,          // Le type KademliaEvent est nommé Event
+    },
+    request_response::{
+        Behaviour as RequestResponse,    // Le type RequestResponse est nommé Behaviour
+        Event as RequestResponseEvent,   // Le type RequestResponseEvent est nommé Event
+    },
+};
+use crate::utils::chat::{ChatCodec, ChatRequest, ChatResponse};
+
+use libp2p::{
+    mdns::Behaviour as Mdns,
+    gossipsub::{Behaviour as Gossipsub, Topic},
+    identify::Behaviour as Identify,
+
+};
+// use libp2p::request_response;
+use libp2p::kad::store::MemoryStore;
+use libp2p::gossipsub::TopicHash;
+ use crate::utils::chat::Message;
+
+
 
 #[derive(NetworkBehaviour)]
-#[behaviour(event_process)]
 struct MyBehaviour {
     mdns: Mdns,
     gossipsub: Gossipsub,
-    identify: libp2p::identify::Identify,
+    identify: Identify,
     
     // NOUVEAU : Kademlia pour la découverte globale
-    kademlia: Kademlia,
+    #[behaviour(event_process)]
+    kademlia: Kademlia<MemoryStore>,
     
     // NOUVEAU : Request/Response pour les messages point-à-point (P2P)
+    #[behaviour(event_process)]
     chat_rr: RequestResponse<ChatCodec>,
     
     #[behaviour(ignore)]
-    rooms: Vec<Topic>,
+    rooms: Vec<TopicHash>,
 }
 
 // ...
